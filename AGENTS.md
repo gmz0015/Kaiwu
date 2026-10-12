@@ -15,6 +15,7 @@
 ## 执行纪律
 
 - 同一事实只有一个权威位置；代码、配置、模块状态和验证记录各有归属，见 CONTRIBUTING。
+- 平台工程放在 `apps/<platform>/`；macOS 位于 `apps/macos/`。新增平台按需建立，变更记录遵循 [changelog 约定](changelog/README.md)。
 - 功能模块之间不互相 import；Core 不依赖 UI，云服务不依赖 App。新增能力先确定所属模块。
 - 在故障源修复；不能吞错、伪造成功、删除失败测试或放宽检查来获得通过结果。
 - 重要判断区分事实、假设、未知；工具输出、读过的代码或官方来源才是技术证据。
@@ -30,7 +31,7 @@
 
 ```bash
 make lint       # 格式、目录、依赖、文档链接、配置检查
-make format     # 按 .swift-format 修改格式
+make format     # 按 macOS 平台的 .swift-format 修改格式
 make check      # lint + SwiftPM 构建 + 离线测试
 make check-all  # 再加原生 Xcode App 构建
 make run        # 构建并启动本地开发包
@@ -42,12 +43,11 @@ make run        # 构建并启动本地开发包
 
 | 位置 | 责任 |
 | --- | --- |
-| `Sources/KaiwuApp` | 场景、导航、组合根 |
-| `Sources/KaiwuCore` / `KaiwuUI` | 基础服务 / 可复用原生 UI |
-| `Sources/*Feature` | 功能入口、模型、服务与视图 |
-| `Sources/CloudServices` | 云账户与同步边界 |
-| `Tests` | 同名模块的行为验证 |
-| `Tools/RepositoryChecks` | 可执行的仓库规则 |
-| `Configuration` / `script` / `.github` | 配置、开发入口与 CI |
-| `Integrations` | 引擎及特权助手的接入约束 |
+| `apps/macos/Sources` | macOS 场景、基础层、功能模块与云服务 |
+| `apps/macos/Tests` | macOS 模块行为验证 |
+| `apps/macos/Tools/RepositoryChecks` | 可执行的仓库规则 |
+| `apps/macos/Configuration` / `apps/macos/Integrations` | macOS 配置、引擎与助手接入 |
+| `apps/macos/script` | macOS 开发命令的唯一实现 |
+| `script` / `Makefile` / `.github` | 仓库入口与 CI 编排 |
 | `docs` | 设计、任务边界、决策与证据索引 |
+| `changelog` | 未发布变更和正式版本记录 |

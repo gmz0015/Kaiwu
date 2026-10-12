@@ -18,7 +18,7 @@
 ## 签名待办
 
 1. 确认最终 Bundle ID 与 Apple Developer Team。
-2. 正式产品标识与版本在 `Configuration/App.xcconfig` 修改。本地 `Configuration/Local.xcconfig` 仅覆盖 `DEVELOPMENT_TEAM`、`CODE_SIGN_IDENTITY` 等签名设置，文件已被忽略。
+2. 正式产品标识与版本在 `apps/macos/Configuration/App.xcconfig` 修改。本地 `apps/macos/Configuration/Local.xcconfig` 仅覆盖 `DEVELOPMENT_TEAM`、`CODE_SIGN_IDENTITY` 等签名设置，文件已被忽略。
 3. Xcode 配置 iCloud / helper 等所需 capability；开发打包脚本从 App.xcconfig 读取标识。
 4. 为独立引擎、XPC/helper 完成嵌套签名和 hardened runtime 验证。
 5. 归档、Developer ID 签名、公证、staple，另行建立发布工作流。

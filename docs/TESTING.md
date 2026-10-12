@@ -9,7 +9,7 @@
 | Package、工程、plist、xcconfig、脚本、CI | `make check-all` | 打包脚本变化另跑 `make build`，检查包元数据 |
 | 外部引擎、系统网络、CloudKit | 上述相关检查 | 真实服务/设备验收，明确授权和恢复方式 |
 
-命令由 `script/` 定义，Makefile 和 CI 调用同一入口。`make lint` 会编译轻量 Swift 检查器，不运行应用或业务测试。测试数据写入临时目录，构建产物写入 `.build/`。
+macOS 命令由 `apps/macos/script/` 定义，根 script、Makefile 和 CI 调用同一入口。`make lint` 会编译轻量 Swift 检查器，不运行应用或业务测试。测试数据写入临时目录，构建缓存写入 `apps/macos/.build/`，开发包写入 `apps/macos/dist/`。
 
 swift-format 随当前 `xcode-select` 指向的工具链运行。CI 会输出工具链版本；若本地与 CI 的格式结果不同，应先对齐工具链并核实差异，不能屏蔽 lint。远端 CI 结果以对应提交的 checks 为准；最低工具链组合仍需单独验证。
 
@@ -24,7 +24,9 @@ swift-format 随当前 `xcode-select` 指向的工具链运行。CI 会输出工
 
 ## 仓库规则检查范围
 
-`Tools/RepositoryChecks` 读取 SwiftPM 实际 manifest，检查层级依赖、本地模块直接 import、模块 README、局部 Markdown 路径、文本换行和应用元数据一致性。检查器有反例测试，确保错误依赖和失效链接被拒绝。
+`apps/macos/Tools/RepositoryChecks` 读取 SwiftPM 实际 manifest，检查层级依赖、本地模块直接 import、模块 README、局部 Markdown 路径、文本换行和应用元数据一致性。检查器有反例测试，确保错误依赖和失效链接被拒绝。
+
+检查器将 manifest 内的目标路径解析到 `apps/macos/`，避免迁移后漏检 import；Markdown 和文本格式检查仍遍历整个仓库，包括 `docs/`、`changelog/`。其他平台需增加对应构建与检查，不能认为根入口会自动覆盖未来平台。
 
 它不替代完整 Swift 语法分析、远程链接检查、凭证扫描或运行时权限审计。新增 import 语法需同步检查器；`@unchecked Sendable`、`try?` 的合理性由审阅确认。
 

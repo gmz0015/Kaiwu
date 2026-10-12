@@ -11,12 +11,13 @@
 | 事实 | 权威来源 |
 | --- | --- |
 | Swift 接口、错误、行为 | 所属模块源码与行为测试 |
-| 模块与实际依赖 | `Package.swift`；架构规则由仓库检查器约束 |
-| 应用名称、版本、Bundle ID、最低系统版本 | `Configuration/App.xcconfig`；Package 平台声明通过检查校验 |
-| 格式 | `.swift-format`；非 Swift 文件遵循 `.editorconfig` |
+| 模块与实际依赖 | `apps/macos/Package.swift`；架构规则由仓库检查器约束 |
+| 应用名称、版本、Bundle ID、最低系统版本 | `apps/macos/Configuration/App.xcconfig`；Package 平台声明通过检查校验 |
+| 格式 | `apps/macos/.swift-format`；非 Swift 文件遵循 `.editorconfig` |
 | 功能当前状态 | 所属模块 README |
 | 职责、决策、计划 | 架构文档、ADR、路线图；不复制完整接口签名 |
-| 开发命令 | `script/`；Makefile 和 CI 只调用入口 |
+| 开发命令 | `apps/macos/script/` 维护 macOS 实现；根 script、Makefile 和 CI 只调用入口 |
+| 未发布及版本变更 | `changelog/`；技术验证与功能状态分别保留在原有权威位置 |
 | 一次验证的事实 | 验证记录中的日期、环境、命令、结果与限制 |
 
 构建格式要求的跨文件同步必须指出来源并加一致性检查。禁止在 App、脚本和文档分别维护同一项可调默认值。
@@ -57,6 +58,8 @@
 目录责任是模块边界，不是虚构的人员审批表。任务包含多个模块时可以一起完成；若其他工作者同时占用，先协调共享文件。并行拆分参考 [WORKSTREAMS](docs/WORKSTREAMS.md)，不自动启动 agent。
 
 ## 2. Swift 与目录规范
+
+客户端按 `apps/<platform>/` 隔离；macOS 的源码、测试、工程、配置、原生集成和平台脚本全部放在 `apps/macos/`。根目录维护公共文档、变更记录和开发入口，新增平台遵循 [apps/README.md](apps/README.md)。本节 Swift 规范针对采用 Swift 的平台。
 
 - 类型、协议用 UpperCamelCase，变量与函数用 lowerCamelCase；文件以主要类型命名。语义分组可以同文件，出现独立职责时拆分。
 - Feature 根目录放模块入口和 README；视图放 `Views`，服务放 `Services`，值类型放 `Models`。只创建确实有内容的子目录。
@@ -108,6 +111,8 @@ Secret 不写进 UserDefaults、日志、文档、错误或 URL 查询参数；�
 ## 6. 文档与交接
 
 模块 README 固定包含“职责 / 现状 / 已完成 / 下一步 / 验证”。其他文档引用模块状态，不维护第二份实时进度表。计划与历史验证记录带时间或阶段，不能冒充当前状态。
+
+影响使用者或开发方式的变更写入 [changelog/Unreleased.md](changelog/Unreleased.md)，标明平台与行为变化；正式发布时按 [变更记录约定](changelog/README.md) 归档，不伪造已发布版本。
 
 跨模块设计写 ADR；未定的产品/发布选择写 OPEN-ITEMS。普通实现细节在授权范围内自行判断。不得以“让检查变绿”为由降低纪律。
 

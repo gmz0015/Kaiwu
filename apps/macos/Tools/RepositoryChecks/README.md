@@ -6,7 +6,7 @@
 
 ## 现状
 
-纯 Swift 可执行工具，由 `script/lint.sh` 传入仓库路径及实际 SwiftPM manifest；不依赖第三方包。
+纯 Swift 可执行工具，由 macOS 的 `script/lint.sh` 传入仓库根路径及实际 SwiftPM manifest；将模块路径解析到 `apps/macos/`，文档和文本检查覆盖整个仓库，不依赖第三方包。
 
 ## 已完成
 
@@ -14,6 +14,7 @@
 - 模块 README 必备小节与 Package 排除项检查。
 - Markdown 本地路径和文本换行检查，覆盖尚未被 Git 跟踪的文件。
 - App.xcconfig、Package 平台与 Info.plist 引用的一致性检查。
+- 嵌套平台目标路径解析，统一目录别名，避免文件枚举路径差异导致 import 漏检。
 
 ## 下一步
 

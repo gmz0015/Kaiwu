@@ -7,10 +7,12 @@ enum RepositoryCheck {
             print("Usage: repository-check <repository-root> <package-dump.json>")
             exit(2)
         }
-        let root = URL(fileURLWithPath: CommandLine.arguments[1]).standardizedFileURL
+        let root = URL(fileURLWithPath: CommandLine.arguments[1]).resolvingSymlinksInPath().standardizedFileURL
+        let packagePath = "apps/macos"
+        let packageRoot = root.appendingPathComponent(packagePath)
         let manifest = URL(fileURLWithPath: CommandLine.arguments[2])
         let data = try Data(contentsOf: manifest)
-        let targets = try RepositoryRules.targets(from: data)
+        let targets = try RepositoryRules.targets(from: data, packagePath: packagePath)
         let moduleNames = Set(targets.map(\.name))
         var issues = RepositoryRules.dependencyIssues(targets)
         let fm = FileManager.default
@@ -31,8 +33,11 @@ enum RepositoryCheck {
                 continue
             }
             if values.isSymbolicLink == true { continue }
-            let relative = file.pathComponents.dropFirst(root.pathComponents.count).joined(separator: "/")
-            if relative == "Configuration/Local.xcconfig" { continue }
+            guard let relative = RepositoryRules.repositoryPath(for: file, root: root) else {
+                issues.append("无法将枚举文件定位到仓库内：\(file.lastPathComponent)。")
+                continue
+            }
+            if relative == "\(packagePath)/Configuration/Local.xcconfig" { continue }
             guard
                 extensions.contains(file.pathExtension)
                     || ["Makefile", ".swift-format", ".editorconfig", ".gitignore", ".gitattributes"].contains(
@@ -55,7 +60,7 @@ enum RepositoryCheck {
             }
             if !target.excludes.contains("README.md") { issues.append("\(target.name)：Package.swift 未排除模块 README。") }
         }
-        issues += try metadataIssues(data: data, root: root)
+        issues += try metadataIssues(data: data, root: packageRoot)
         if issues.isEmpty {
             print("仓库检查通过：目录、模块依赖、文档链接与应用元数据。")
         } else {

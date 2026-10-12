@@ -28,7 +28,7 @@
 
 ## 记录格式
 
-每次提交/PR记录以下内容；初次初始化记录见 [首次公开审查](reviews/2026-10-12-initial-public-review.md)。
+每次提交/PR记录以下内容；已有记录见 [首次公开审查](reviews/2026-10-12-initial-public-review.md)、[平台目录调整审查](reviews/2026-10-12-platform-layout-public-review.md)。
 
 - 范围：基线、目标分支、文件/提交范围。
 - 发现与处理：只写类型、位置、处理结果，不包含秘密原文。
