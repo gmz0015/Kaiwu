@@ -1,0 +1,14 @@
+#include "App.xcconfig"
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+CLANG_ENABLE_MODULES = YES
+ENABLE_HARDENED_RUNTIME = YES
+ENABLE_APP_SANDBOX = NO
+CODE_SIGN_STYLE = Automatic
+CODE_SIGN_IDENTITY = -
+CODE_SIGN_ENTITLEMENTS = Configuration/Kaiwu.entitlements
+GENERATE_INFOPLIST_FILE = NO
+INFOPLIST_FILE = Configuration/Info.plist
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
+// 本地签名覆盖；证书与私钥不进入仓库。
+#include? "Local.xcconfig"

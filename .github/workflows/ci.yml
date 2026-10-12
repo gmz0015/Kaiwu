@@ -1,0 +1,22 @@
+name: macOS
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: 记录工具链
+        run: |
+          xcodebuild -version
+          swift --version
+          xcrun swift-format --version
+      - name: 静态检查、离线测试与原生构建
+        run: ./script/check.sh --all

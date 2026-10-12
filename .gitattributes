@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.swift text
+*.png binary
+*.zip binary
