@@ -1,23 +1,26 @@
+import KaiwuCore
 import KaiwuUI
 import SwiftUI
 
 struct ProxyView: View {
-    @AppStorage("proxy.controllerEndpoint") private var endpoint = "http://127.0.0.1:9090"
+    @AppStorage(ToolPreferences.controllerEndpointKey) private var endpoint = ToolPreferences.defaultControllerEndpoint
     @State private var secret = ""
-    @State private var result: String?
-    @State private var task: Task<Void, Never>?
+    @State private var operation = ToolTask<String>()
 
     var body: some View {
         FeaturePage("代理", subtitle: "连接本机核心，逐步构建原生代理工作台。") {
             GroupBox("Mihomo 控制器") {
                 VStack(alignment: .leading, spacing: 16) {
-                    TextField("控制器地址", text: $endpoint)
-                    SecureField("Secret（仅本次保存在内存中）", text: $secret)
+                    TextField("控制器地址", text: $endpoint).disabled(operation.isRunning)
+                    SecureField("Secret（仅本次保存在内存中）", text: $secret).disabled(operation.isRunning)
                     HStack {
-                        Button("读取版本") { connect() }.buttonStyle(.borderedProminent).disabled(task != nil)
-                        if task != nil { ProgressView().controlSize(.small) }
+                        Button("读取版本") { connect() }.buttonStyle(.borderedProminent).disabled(operation.isRunning)
+                        if operation.isRunning {
+                            ToolTaskControls(isCancelling: operation.isCancelling, cancel: operation.cancel)
+                        }
                     }
-                    if let result { Text(result).font(.callout) }
+                    if let result = operation.result { Text(result).font(.callout) }
+                    if let error = operation.error { Text(error).foregroundStyle(.red) }
                     Text("请在现有代理应用中启用 external-controller。此操作仅读取版本，不会启动核心或切换系统代理。")
                         .foregroundStyle(.secondary)
                 }.textFieldStyle(.roundedBorder).padding(12)
@@ -28,20 +31,19 @@ struct ProxyView: View {
             }
         }
         .onDisappear {
-            task?.cancel(); secret = ""
+            operation.cancel(); secret = ""
         }
     }
 
     private func connect() {
-        result = nil
-        task = Task {
-            defer { task = nil }
-            do {
-                guard let url = URL(string: endpoint) else { throw ProxyError.invalidEndpoint }
-                let controller = try MihomoController(endpoint: url, secret: secret)
-                let version = try await controller.version()
-                result = "已连接，核心版本：\(version.version)"
-            } catch { result = error.localizedDescription }
+        let address = endpoint
+        let credential = secret
+        operation.start {
+            guard let url = URL(string: address) else { throw ProxyError.invalidEndpoint }
+            let controller = try MihomoController(endpoint: url, secret: credential)
+            let version = try await controller.version()
+            try Task.checkCancellation()
+            return "已连接，核心版本：\(version.version)"
         }
     }
 }

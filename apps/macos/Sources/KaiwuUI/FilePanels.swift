@@ -13,6 +13,13 @@ public enum FilePanels {
         return panel.runModal() == .OK ? panel.url : nil
     }
 
+    public static func text(named name: String) -> URL? {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = name
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+
     public static func archive(named name: String) -> URL? {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.zip]

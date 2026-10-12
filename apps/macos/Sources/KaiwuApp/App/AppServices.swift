@@ -9,16 +9,18 @@ import TerminalFeature
 @MainActor
 struct AppServices {
     let modules: [any FeatureModule]
+    let archiveLibrary: ArchiveLibraryService
     let cloudAccount: any CloudAccountServicing
 
     static func live() -> AppServices {
         let runner = ProcessRunner()
+        let archiveLibrary = ArchiveLibraryService()
         return AppServices(
             modules: [
                 TerminalModule(),
-                ArchiveModule(service: ZipArchiveService(runner: runner)),
+                ArchiveModule(service: ZipArchiveService(runner: runner), library: archiveLibrary),
                 NetworkModule(service: SystemNetworkDiagnostics(runner: runner)),
                 ProxyModule(),
-            ], cloudAccount: DisabledCloudAccountService())
+            ], archiveLibrary: archiveLibrary, cloudAccount: DisabledCloudAccountService())
     }
 }

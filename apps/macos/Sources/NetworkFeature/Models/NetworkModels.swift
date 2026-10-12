@@ -1,6 +1,6 @@
 import Foundation
 
-public enum DiagnosticLevel: String, Sendable { case pass, info, warning, failure, unavailable }
+public enum DiagnosticLevel: String, Sendable { case pass, info, warning, failure, unavailable, skipped }
 
 public struct DiagnosticFinding: Identifiable, Sendable {
     public let id: String

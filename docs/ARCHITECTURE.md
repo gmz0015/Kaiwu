@@ -33,12 +33,13 @@ flowchart TD
 | --- | --- |
 | 依赖实例 | App 的组合根 |
 | 窗口导航 | `@SceneStorage`，每个窗口独立 |
-| 表单、结果、任务 | 功能页面的 `@State` |
-| 可持久化探测地址 | `@AppStorage` |
+| 表单、结果、任务 | 页面 `@State` 持有表单和 Core `ToolTask`，离开页面请求取消 |
+| 持久化规则、探测地址与开关 | 页面与 Settings 共用 `@AppStorage`；键和默认值由所属模块定义 |
+| 本机打包书签与成功历史 | 组合根共享 ArchiveLibraryService actor，文件持久化；页面持有展示副本 |
 | 控制器 Secret | 页面内存；离开页面清空，后续持久化使用 Keychain |
 | 文件处理 | actor 服务，不阻塞主线程 |
 
-较复杂功能可以引入 `@MainActor @Observable` store；不为简单表单添加多余 ViewModel。离开 ZIP/诊断页面会取消相应任务，首版不提供后台任务队列。
+较复杂功能可以引入 `@MainActor @Observable` store；不为简单表单添加多余 ViewModel。工具页面离开时统一请求取消，等待操作退出后才能重复启动；首版不提供后台任务队列。已发布的文件和已经交给系统的外部应用启动不回滚。历史列表在进入页面及本页操作后刷新，其他窗口的历史变化在重新进入时读取。
 
 ## 新增功能步骤
 
@@ -64,4 +65,4 @@ AppKit 仅用于系统文件对话框、应用启动和 Finder 定位；主界�
 
 ## 当前验证边界
 
-自动测试不访问公网、不修改系统网络，不需要 Ghostty/Mihomo/CloudKit 账户。ZIP 测试运行真实系统 zip/unzip，进程测试验证参数、超时、取消和大输出；网络和控制器测试使用解析样例与构造请求。实际外部应用启动、Mihomo API 连接和已签名 CloudKit 需接入后进行集成验收。
+自动测试不访问公网、不修改系统网络，不需要 Ghostty/Mihomo/CloudKit 账户。ZIP 测试运行真实系统 zip/unzip，进程测试验证参数、超时、取消和大输出；网络和控制器测试使用解析样例与构造请求，另以临时回环服务器验证本机 TCP/PAC HEAD 探测。实际外部应用启动、Mihomo API 连接和已签名 CloudKit 需接入后进行集成验收。
