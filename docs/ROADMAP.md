@@ -4,6 +4,8 @@
 
 ## 1 · 打磨本地工具
 
+2026-10-12：本阶段四项已落地代码与自动化验证；桌面交互与真实外部卷验收仍待完成，暂不勾选阶段验收。功能现状见 [ArchiveFeature](../apps/macos/Sources/ArchiveFeature/README.md)、[NetworkFeature](../apps/macos/Sources/NetworkFeature/README.md) 和 [KaiwuApp](../apps/macos/Sources/KaiwuApp/README.md)，证据及限制见 [验证记录](VALIDATION.md)。
+
 - [ ] ZIP 进度、规则预设、书签与历史；大目录/磁盘不足/文件变化专项测试
 - [ ] 网络诊断界面分组，受控导出与隐私脱敏
 - [ ] 本机代理端口、PAC 与按服务代理检查

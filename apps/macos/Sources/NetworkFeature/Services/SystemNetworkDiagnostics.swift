@@ -4,16 +4,21 @@ import Foundation
 public struct SystemNetworkDiagnostics: NetworkDiagnosing {
     private let runner: any CommandRunning
     private let httpsProbe: any HTTPSProbing
-    public init(runner: any CommandRunning = ProcessRunner(), httpsProbe: any HTTPSProbing = SystemHTTPSProbe()) {
+    private let serviceProxies: ServiceProxyDiagnostics
+    public init(
+        runner: any CommandRunning = ProcessRunner(), httpsProbe: any HTTPSProbing = SystemHTTPSProbe(),
+        serviceProxies: ServiceProxyDiagnostics = ServiceProxyDiagnostics()
+    ) {
         self.runner = runner
         self.httpsProbe = httpsProbe
+        self.serviceProxies = serviceProxies
     }
 
-    public func diagnose(url: URL) async throws -> NetworkReport {
+    public func diagnose(url: URL, externalProbes: Bool) async throws -> NetworkReport {
         guard url.scheme == "https", let host = url.host, !host.isEmpty,
-            url.user == nil, url.password == nil
+            url.user == nil, url.password == nil, url.query == nil, url.fragment == nil
         else {
-            throw CommandError.failed("请输入不含用户名和密码的 HTTPS 地址。")
+            throw CommandError.failed("请输入不含用户名、密码、查询参数或片段的 HTTPS 地址。")
         }
         var findings: [DiagnosticFinding] = []
         var suggestions: [String] = []
@@ -41,6 +46,10 @@ public struct SystemNetworkDiagnostics: NetworkDiagnosing {
         ]
         for (id, title, command) in commands {
             try Task.checkCancellation()
+            if !externalProbes && ["dns", "external-dns", "direct"].contains(id) {
+                findings.append(.init(id: id, title: title, level: .skipped, detail: "外部探测已关闭，本项未运行。"))
+                continue
+            }
             do {
                 let result = try await runner.run(command)
                 guard result.status == 0 else {
@@ -52,6 +61,10 @@ public struct SystemNetworkDiagnostics: NetworkDiagnosing {
                 }
                 var level: DiagnosticLevel = .info
                 var detail = result.output.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !detail.isEmpty, !detail.contains("[输出已截断]") else {
+                    findings.append(.init(id: id, title: title, level: .unavailable, detail: "命令输出为空或不完整，无法判断状态。"))
+                    continue
+                }
                 switch id {
                 case "dns":
                     let addresses = NetworkParser.systemAddresses(in: detail)
@@ -77,6 +90,7 @@ public struct SystemNetworkDiagnostics: NetworkDiagnosing {
                 case "proxy":
                     let enabled = ["HTTPEnable", "HTTPSEnable", "SOCKSEnable", "ProxyAutoConfigEnable"]
                         .contains { NetworkParser.value($0, in: detail) == "1" }
+                    detail = enabled ? "动态配置已启用代理或 PAC；请对照下方按服务检查。" : "动态配置未显示已启用的 HTTP、HTTPS、SOCKS 或 PAC 代理。"
                     if enabled { suggestions.append("系统代理已启用；若直连成功但系统路径失败，请检查代理端口或 PAC 服务。") }
                 case "direct":
                     let code = Int(detail) ?? 0
@@ -94,7 +108,12 @@ public struct SystemNetworkDiagnostics: NetworkDiagnosing {
             }
         }
         try Task.checkCancellation()
-        findings.append(await httpsProbe.check(url: url))
+        findings += try await serviceProxies.diagnose()
+        if externalProbes {
+            findings.append(await httpsProbe.check(url: url))
+        } else {
+            findings.append(.init(id: "system-https", title: "HTTPS 系统网络路径", level: .skipped, detail: "外部探测已关闭，本项未运行。"))
+        }
         try Task.checkCancellation()
         if suggestions.isEmpty { suggestions.append("未生成针对性修复建议。请查看各项结果；单次探测不能证明所有网络路径正常。") }
         return NetworkReport(

@@ -6,13 +6,14 @@ public struct ArchivePolicy: Sendable {
         self.excludeDevelopmentArtifacts = excludeDevelopmentArtifacts
     }
 
+    private static let metadata: Set<String> = [
+        ".DS_Store", "__MACOSX", ".Spotlight-V100", ".Trashes", ".fseventsd", ".TemporaryItems",
+    ]
+    private static let development: Set<String> = [".git", ".build", "node_modules", "DerivedData"]
+
     public func excludes(component: String) -> Bool {
-        let metadata: Set<String> = [
-            ".DS_Store", "__MACOSX", ".Spotlight-V100", ".Trashes", ".fseventsd", ".TemporaryItems",
-        ]
-        let development: Set<String> = [".git", ".build", "node_modules", "DerivedData"]
-        return metadata.contains(component) || component.hasPrefix("._")
-            || (excludeDevelopmentArtifacts && development.contains(component))
+        Self.metadata.contains(component) || component.hasPrefix("._")
+            || (excludeDevelopmentArtifacts && Self.development.contains(component))
     }
 }
 

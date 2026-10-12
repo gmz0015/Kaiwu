@@ -14,7 +14,7 @@ struct KaiwuApp: App {
         }
         .defaultSize(width: 1080, height: 720)
         .commands { SidebarCommands() }
-        Settings { SettingsView(cloudAccount: services.cloudAccount) }
+        Settings { SettingsView(cloudAccount: services.cloudAccount, archiveLibrary: services.archiveLibrary) }
     }
 }
 

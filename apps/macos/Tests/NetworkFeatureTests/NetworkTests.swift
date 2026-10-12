@@ -35,6 +35,10 @@ private struct FailedRunner: CommandRunning {
         .init(status: 1, output: "", errorOutput: "unavailable")
     }
 }
+private struct FailedServiceReader: ServiceProxyReading {
+    func read() async throws -> [ServiceProxyConfiguration] { throw CommandError.failed("fixture") }
+}
+
 private struct StubHTTPS: HTTPSProbing {
     func check(url: URL) async -> DiagnosticFinding {
         .init(id: "system-https", title: "Test", level: .unavailable, detail: "Offline fixture")
@@ -42,17 +46,23 @@ private struct StubHTTPS: HTTPSProbing {
 }
 
 @Test func failedProbesNeverReportHealthy() async throws {
-    let report = try await SystemNetworkDiagnostics(runner: FailedRunner(), httpsProbe: StubHTTPS())
-        .diagnose(url: URL(string: "https://example.com")!)
-    #expect(report.findings.count == 9)
+    let report = try await SystemNetworkDiagnostics(
+        runner: FailedRunner(), httpsProbe: StubHTTPS(),
+        serviceProxies: .init(reader: FailedServiceReader())
+    )
+    .diagnose(url: URL(string: "https://example.com")!)
+    #expect(report.findings.count == 10)
     #expect(report.findings.allSatisfy { $0.level == .unavailable })
     #expect(report.repairPlan.proposedActions.isEmpty)
 }
 
 @Test func diagnosticRejectsNonHTTPSURLs() async {
     await #expect(throws: CommandError.self) {
-        try await SystemNetworkDiagnostics(runner: FailedRunner(), httpsProbe: StubHTTPS())
-            .diagnose(url: URL(string: "file:///etc/hosts")!)
+        try await SystemNetworkDiagnostics(
+            runner: FailedRunner(), httpsProbe: StubHTTPS(),
+            serviceProxies: .init(reader: FailedServiceReader())
+        )
+        .diagnose(url: URL(string: "file:///etc/hosts")!)
     }
 }
 
