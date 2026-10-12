@@ -11,7 +11,7 @@ xcuserdata/
 .env
 .env.*
 !.env.example
-Configuration/Local.xcconfig
+**/Configuration/Local.xcconfig
 *.p12
 *.mobileprovision
 *.provisionprofile

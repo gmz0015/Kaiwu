@@ -1,5 +1,11 @@
 # 架构与扩展
 
+## 平台目录
+
+仓库以 `apps/<platform>/` 放置独立客户端，目前 macOS 的完整工程位于 `apps/macos/`。SwiftPM、Xcode、配置、测试、工具及平台脚本使用平台目录作为构建根；业务模块内部的相对路径保持一致。
+
+根目录 `script/` 与 Makefile 是便捷入口，转发到平台脚本；`.github/` 编排 CI。`docs/` 管理公共规范及设计，`changelog/` 维护版本变化。平台新增方式见 [平台约定](../apps/README.md)。只有存在多个真实消费者时才提取共享包，不让客户端直接引用彼此内部源码。
+
 ## 分层依赖
 
 ```mermaid
@@ -36,17 +42,17 @@ flowchart TD
 
 ## 新增功能步骤
 
-1. 创建 `Sources/YourFeature/`，按需求添加模型、服务协议、实现与视图。
-2. 在 `Package.swift` 增加 target 和 library product，通常依赖 Core / UI。
+1. 创建 `apps/macos/Sources/YourFeature/`，按需求添加模型、服务协议、实现与视图。
+2. 在 `apps/macos/Package.swift` 增加 target 和 library product，通常依赖 Core / UI。
 3. 实现 `FeatureModule`，保证 `descriptor.id` 唯一且发布后稳定。
 4. 为 App executable 增加依赖；在 Xcode App target 的 Frameworks, Libraries, and Embedded Content 中加入对应本地 package product。
 5. 在 `AppServices.live()` 中注入服务并注册模块；侧边栏与工作台自动显示。
 6. 添加模块 README，按模板维护职责、现状、已完成、下一步和验证；在 Package target 中排除 README。
-7. 为有行为的服务补充 `Tests/YourFeatureTests`，直接声明测试所 import 的每个本地模块。运行 `make check-all`。
+7. 为有行为的服务补充 `apps/macos/Tests/YourFeatureTests`，直接声明测试所 import 的每个本地模块。运行 `make check-all`。
 
-功能模块根目录只保留 `*Module.swift` 入口和 README，具体实现分入 `Models`、`Services`、`Views`。小模块不强制建立未使用的目录。开发工具单独放在 `Tools`，不链接进 App。
+功能模块根目录只保留 `*Module.swift` 入口和 README，具体实现分入 `Models`、`Services`、`Views`。小模块不强制建立未使用的目录。macOS 开发工具单独放在 `apps/macos/Tools`，不链接进 App。
 
-边界规则由 `Tools/RepositoryChecks` 检查；实际依赖以 Package.swift 为准。共同代码格式、状态交接与工作区纪律见 [开发规范](../CONTRIBUTING.md)。
+边界规则由 `apps/macos/Tools/RepositoryChecks` 检查；实际依赖以 Package.swift 为准。共同代码格式、状态交接与工作区纪律见 [开发规范](../CONTRIBUTING.md)。
 
 ## 系统边界
 

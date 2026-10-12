@@ -2,6 +2,8 @@
 
 本表用于拆分任务和评估改动范围，不要求启动并行 agent，不指定不存在的负责人。
 
+下表应用模块及集成路径均相对于 `apps/macos/`；根目录 `docs/`、`changelog/`、`script/`、Makefile 与 CI 属于仓库级工作流。
+
 | 工作流 | 主要位置 | 输入 / 输出边界 | 完成条件 |
 | --- | --- | --- | --- |
 | 基础设施 | Core、UI、Tools、Configuration、script、Package、Xcode 工程 | 可复用能力与开发入口 | 规则、离线测试、双构建入口一致 |

@@ -18,5 +18,6 @@ jobs:
           xcodebuild -version
           swift --version
           xcrun swift-format --version
-      - name: 静态检查、离线测试与原生构建
+      # 仓库入口转发到 apps/macos；根文档与变更记录也纳入检查。
+      - name: macOS 静态检查、离线测试与原生构建
         run: ./script/check.sh --all

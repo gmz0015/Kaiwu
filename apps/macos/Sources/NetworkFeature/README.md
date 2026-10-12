@@ -14,7 +14,7 @@
 
 ## 下一步
 
-按服务的代理/端口/PAC 检测、完整快照、授权 helper 与回滚。设计见 [网络恢复](../../docs/NETWORK-RECOVERY.md)。
+按服务的代理/端口/PAC 检测、完整快照、授权 helper 与回滚。设计见 [网络恢复](../../../../docs/NETWORK-RECOVERY.md)。
 
 ## 验证
 

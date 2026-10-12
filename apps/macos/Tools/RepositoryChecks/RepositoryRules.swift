@@ -9,7 +9,15 @@ struct TargetInfo {
 }
 
 enum RepositoryRules {
-    static func targets(from data: Data) throws -> [TargetInfo] {
+    /// 目录枚举可能保留 /private 前缀，根 URL 却使用别名；先对两侧采用相同归一化。
+    static func repositoryPath(for file: URL, root: URL) -> String? {
+        let components = file.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        let rootComponents = root.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        guard components.starts(with: rootComponents), components.count > rootComponents.count else { return nil }
+        return components.dropFirst(rootComponents.count).joined(separator: "/")
+    }
+
+    static func targets(from data: Data, packagePath: String = "") throws -> [TargetInfo] {
         guard let package = try JSONSerialization.jsonObject(with: data) as? [String: Any],
             let targets = package["targets"] as? [[String: Any]]
         else {
@@ -27,9 +35,10 @@ enum RepositoryRules {
                 }
                 throw CheckError.invalidManifest
             }
+            let modulePath = target["path"] as? String ?? "\(kind == "test" ? "Tests" : "Sources")/\(name)"
             return TargetInfo(
                 name: name, kind: kind,
-                path: target["path"] as? String ?? "\(kind == "test" ? "Tests" : "Sources")/\(name)",
+                path: packagePath.isEmpty ? modulePath : "\(packagePath)/\(modulePath)",
                 dependencies: Set(names), excludes: Set(target["exclude"] as? [String] ?? []))
         }
     }

@@ -18,4 +18,4 @@ FeatureModule 负责导航所需的描述与视图工厂，面板不持有页面
 
 ## 验证
 
-`make check` 验证编译；布局/面板变更按 [验证矩阵](../../docs/TESTING.md) 做交互检查。
+`make check` 验证编译；布局/面板变更按 [验证矩阵](../../../../docs/TESTING.md) 做交互检查。
