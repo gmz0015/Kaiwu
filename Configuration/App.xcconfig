@@ -1,0 +1,7 @@
+// 应用元数据的权威来源；开发打包脚本只读取这些简单字面量，不执行配置内容。
+PRODUCT_NAME = Kaiwu
+APP_DISPLAY_NAME = 开物 Kaiwu
+PRODUCT_BUNDLE_IDENTIFIER = dev.kaiwu.app
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+MACOSX_DEPLOYMENT_TARGET = 14.0
