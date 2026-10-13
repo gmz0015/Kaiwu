@@ -14,6 +14,14 @@ struct KaiwuApp: App {
         }
         .defaultSize(width: 1080, height: 720)
         .commands { SidebarCommands() }
+        MenuBarExtra {
+            MenuBarContentView()
+        } label: {
+            Image("MenuBarIcon")
+                .renderingMode(.template)
+                .accessibilityLabel(AppIdentity.displayName)
+        }
+        .menuBarExtraStyle(.menu)
         Settings { SettingsView(cloudAccount: services.cloudAccount, archiveLibrary: services.archiveLibrary) }
     }
 }

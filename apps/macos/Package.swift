@@ -28,7 +28,7 @@ let package = Package(
             dependencies: [
                 "KaiwuCore", "KaiwuUI", "ArchiveFeature", "NetworkFeature",
                 "TerminalFeature", "ProxyFeature", "CloudServices",
-            ], exclude: ["README.md"]),
+            ], exclude: ["README.md", "Resources"]),
         .testTarget(name: "KaiwuCoreTests", dependencies: ["KaiwuCore"]),
         .testTarget(name: "ArchiveFeatureTests", dependencies: ["ArchiveFeature", "KaiwuCore"]),
         .testTarget(name: "NetworkFeatureTests", dependencies: ["NetworkFeature", "KaiwuCore"]),

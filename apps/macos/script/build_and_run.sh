@@ -13,6 +13,7 @@ BUNDLE_ID="$(app_setting PRODUCT_BUNDLE_IDENTIFIER)"
 APP_VERSION="$(app_setting MARKETING_VERSION)"
 BUILD_VERSION="$(app_setting CURRENT_PROJECT_VERSION)"
 MIN_SYSTEM_VERSION="$(app_setting MACOSX_DEPLOYMENT_TARGET)"
+APP_ICON_NAME="$(app_setting ASSETCATALOG_COMPILER_APPICON_NAME)"
 APP_BUNDLE="$KAIWU_MACOS_ROOT/dist/$APP_NAME.app"
 cd "$KAIWU_MACOS_ROOT"
 
@@ -26,6 +27,7 @@ STAGING_DIR="$(mktemp -d "$KAIWU_MACOS_ROOT/.build/app-bundle.XXXXXX")"
 STAGED_APP="$STAGING_DIR/$APP_NAME.app"
 trap 'rm -rf "$STAGING_DIR"' EXIT
 mkdir -p "$STAGED_APP/Contents/MacOS"
+mkdir -p "$STAGED_APP/Contents/Resources"
 cp "$BUILD_BINARY" "$STAGED_APP/Contents/MacOS/$APP_NAME"
 cp "$KAIWU_MACOS_ROOT/Configuration/Info.plist" "$STAGED_APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $APP_NAME" "$STAGED_APP/Contents/Info.plist"
@@ -35,6 +37,12 @@ cp "$KAIWU_MACOS_ROOT/Configuration/Info.plist" "$STAGED_APP/Contents/Info.plist
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$STAGED_APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_VERSION" "$STAGED_APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion $MIN_SYSTEM_VERSION" "$STAGED_APP/Contents/Info.plist"
+# 与 Xcode 共用资源目录和图标配置；合并 actool 生成的图标元数据。
+xcrun actool "$KAIWU_MACOS_ROOT/Sources/KaiwuApp/Resources/Assets.xcassets" \
+  --compile "$STAGED_APP/Contents/Resources" --platform macosx \
+  --minimum-deployment-target "$MIN_SYSTEM_VERSION" --app-icon "$APP_ICON_NAME" \
+  --output-partial-info-plist "$STAGING_DIR/asset-info.plist"
+/usr/libexec/PlistBuddy -c "Merge $STAGING_DIR/asset-info.plist" "$STAGED_APP/Contents/Info.plist"
 /usr/bin/codesign --force --sign - "$STAGED_APP"
 mkdir -p "$KAIWU_MACOS_ROOT/dist"
 if [[ -e "$APP_BUNDLE" ]]; then mv "$APP_BUNDLE" "$STAGING_DIR/previous.app"; fi

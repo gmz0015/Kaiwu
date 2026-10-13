@@ -19,7 +19,7 @@ flowchart TD
 
 功能模块不互相 import。跨功能的数据交流后续通过 Core 中明确的协议和值类型完成；禁止把 Shell、CloudKit、代理核心实现直接放进 App 导航层。
 
-- **App 层**：`AppServices.live()` 是唯一默认依赖装配入口，场景提供 `WindowGroup` 与独立 `Settings`。
+- **App 层**：`AppServices.live()` 是唯一默认依赖装配入口，场景提供 `WindowGroup`、独立 `Settings` 与 `MenuBarExtra`。
 - **Core 层**：只包含可复用模型与基础服务，不 import SwiftUI。
 - **UI 层**：`FeatureModule` 暴露稳定 ID、描述与视图工厂，`AnyView` 只用于功能模块边界。
 - **Feature 层**：一个功能一个 target，内部按服务、模型和界面拆文件，协议支持测试替身。
