@@ -23,15 +23,15 @@
 
 - [ZIP 服务](Services/ZipArchiveService.swift) 与 [分块文件读写](Services/ArchiveFileIO.swift)：元数据过滤、符号链接跳过、取消、时限、容量检查、源文件变化检测和目标保护。
 - [进度与预设](Models/ArchiveProgress.swift)、[页面](Views/ArchiveView.swift)：阶段反馈、规则记忆和取消状态。
-- [本机记录服务](Services/ArchiveLibraryService.swift)：目录书签、失效提示、移动后定位、成功历史、有界保留和明确的损坏数据错误。
+- [本机记录服务](Services/ArchiveLibraryService.swift)：目录书签、失效提示、移动后定位、目录别名归一化去重、成功历史、有界保留和明确的损坏数据错误。
 - [规则](Models/ArchivePolicy.swift) 保留普通隐藏文件；开发预设额外排除常见依赖和构建目录。
 
 ## 下一步
 
-完成文件面板、多窗口、设置联动和重新启动后的 UI 验收；补充真实满盘、外部卷及极大目录的设备验证。当前使用非沙盒开发包的普通文件书签；若启用 App Sandbox，需切换为 security-scoped bookmark 并验证访问生命周期。
+完成文件面板、多窗口、设置联动和重新启动后的 UI 验收；补充真实满盘和外部卷的设备验证；已有 10 万文件与 512 MiB 文件的本机实测不代表任意规模保证。当前使用非沙盒开发包的普通文件书签；若启用 App Sandbox，需切换为 security-scoped bookmark 并验证访问生命周期。
 
 ## 验证
 
 [基础归档测试](../../Tests/ArchiveFeatureTests/ArchiveTests.swift)、[可靠性测试](../../Tests/ArchiveFeatureTests/ArchiveReliabilityTests.swift) 使用真实 zip/unzip，覆盖 2,049 文件目录、字节进度、分块取消、保存时取消、注入容量不足、超时、源文件变化、链接替换、权限/时间保留与目标竞争保护。
 
-[记录测试](../../Tests/ArchiveFeatureTests/ArchiveLibraryTests.swift) 使用临时数据验证持久化、保留上限、目录重命名、损坏/失效与清除边界。运行 `make check`；真实验证范围见 [验证记录](../../../../docs/VALIDATION.md)。
+[记录测试](../../Tests/ArchiveFeatureTests/ArchiveLibraryTests.swift) 使用临时数据验证持久化、保留上限、目录重命名、目录别名去重、旧别名书签兼容、别名源目录再次使用、损坏/失效与清除边界。运行 `make check`；真实验证范围见 [验证记录](../../../../docs/VALIDATION.md)。

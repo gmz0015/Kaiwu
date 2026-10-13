@@ -34,16 +34,17 @@ public actor ArchiveLibraryService {
     public func addBookmark(_ url: URL) throws -> ArchiveLibrary {
         var library = try load()
         // 重复选择相同目录时更新书签；失效书签仍保留，供用户单独移除。
-        let data = try bookmark(url)
+        let directory = url.resolvingSymlinksInPath().standardizedFileURL
+        let data = try bookmark(directory)
         library.bookmarks.removeAll { item in
             var stale = false
             // 此可选解析仅用于去重，解析失败不会隐去原有书签。
             let resolved = try? URL(
                 resolvingBookmarkData: item.data, options: [.withoutUI, .withoutMounting],
                 bookmarkDataIsStale: &stale)
-            return resolved?.standardizedFileURL == url.standardizedFileURL
+            return resolved?.resolvingSymlinksInPath().standardizedFileURL == directory
         }
-        library.bookmarks.insert(.init(id: UUID(), name: url.lastPathComponent, data: data), at: 0)
+        library.bookmarks.insert(.init(id: UUID(), name: directory.lastPathComponent, data: data), at: 0)
         library.bookmarks = Array(library.bookmarks.prefix(20))
         try save(library)
         return library
@@ -99,7 +100,8 @@ public actor ArchiveLibraryService {
     }
 
     private func bookmark(_ url: URL) throws -> Data {
-        try url.bookmarkData(
+        // 与打包服务使用同一真实路径，避免书签指向符号链接本身而无法再次选用。
+        try url.resolvingSymlinksInPath().standardizedFileURL.bookmarkData(
             options: [.withoutImplicitSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 
@@ -110,7 +112,7 @@ public actor ArchiveLibraryService {
             guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
                 throw CommandError.failed("文件不可用。")
             }
-            return url
+            return url.resolvingSymlinksInPath().standardizedFileURL
         } catch { throw CommandError.failed("书签已失效或磁盘未连接，请重新选择目录或文件。") }
     }
 

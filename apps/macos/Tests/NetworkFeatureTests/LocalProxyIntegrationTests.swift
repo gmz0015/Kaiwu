@@ -5,25 +5,54 @@ import Testing
 
 /// 仅在回环接口的系统分配端口监听，固定响应，不读取真实网络配置。
 @Test func localTCPAndPACProbesReachControlledLoopbackServer() async throws {
-    let server = socket(AF_INET, SOCK_STREAM, 0)
+    try await checkLoopbackServer(ipv6: false)
+}
+
+@Test func localIPv6TCPAndPACProbesReachControlledLoopbackServer() async throws {
+    try await checkLoopbackServer(ipv6: true)
+}
+
+private func checkLoopbackServer(ipv6: Bool) async throws {
+    let server = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0)
     guard server >= 0 else { throw POSIXError(.EIO) }
     defer { close(server) }
-    var address = sockaddr_in()
-    address.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-    address.sin_family = sa_family_t(AF_INET)
-    address.sin_addr.s_addr = inet_addr("127.0.0.1")
-    let bound = withUnsafePointer(to: &address) {
-        $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-            bind(server, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+    let port: Int
+    if ipv6 {
+        var address = sockaddr_in6()
+        address.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
+        address.sin6_family = sa_family_t(AF_INET6)
+        address.sin6_addr = in6addr_loopback
+        let bound = withUnsafePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                bind(server, $0, socklen_t(MemoryLayout<sockaddr_in6>.size))
+            }
         }
+        guard bound == 0 else { throw POSIXError(.EIO) }
+        var length = socklen_t(MemoryLayout<sockaddr_in6>.size)
+        let named = withUnsafeMutablePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { getsockname(server, $0, &length) }
+        }
+        guard named == 0 else { throw POSIXError(.EIO) }
+        port = Int(UInt16(bigEndian: address.sin6_port))
+    } else {
+        var address = sockaddr_in()
+        address.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+        address.sin_family = sa_family_t(AF_INET)
+        address.sin_addr.s_addr = inet_addr("127.0.0.1")
+        let bound = withUnsafePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                bind(server, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+            }
+        }
+        guard bound == 0 else { throw POSIXError(.EIO) }
+        var length = socklen_t(MemoryLayout<sockaddr_in>.size)
+        let named = withUnsafeMutablePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { getsockname(server, $0, &length) }
+        }
+        guard named == 0 else { throw POSIXError(.EIO) }
+        port = Int(UInt16(bigEndian: address.sin_port))
     }
-    guard bound == 0, listen(server, 2) == 0 else { throw POSIXError(.EIO) }
-    var length = socklen_t(MemoryLayout<sockaddr_in>.size)
-    let named = withUnsafeMutablePointer(to: &address) {
-        $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { getsockname(server, $0, &length) }
-    }
-    guard named == 0 else { throw POSIXError(.EIO) }
-    let port = Int(UInt16(bigEndian: address.sin_port))
+    guard listen(server, 2) == 0 else { throw POSIXError(.EIO) }
     let serving = Task.detached {
         var request = ""
         for index in 0..<2 {
@@ -47,8 +76,9 @@ import Testing
         return request
     }
     let probe = LocalProxyProbe()
-    #expect(try await probe.port(host: "127.0.0.1", port: port) == .pass)
-    #expect(try await probe.pac(url: URL(string: "http://localhost:\(port)/fixture.pac")!) == .pass)
+    #expect(try await probe.port(host: ipv6 ? "::1" : "127.0.0.1", port: port) == .pass)
+    let host = ipv6 ? "[::1]" : "localhost"
+    #expect(try await probe.pac(url: URL(string: "http://\(host):\(port)/fixture.pac")!) == .pass)
     let request = try await serving.value
     #expect(request.hasPrefix("HEAD /fixture.pac HTTP/"))
 }
