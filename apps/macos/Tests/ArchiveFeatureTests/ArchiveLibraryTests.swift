@@ -67,3 +67,63 @@ import Testing
     let resolved = try await store.resolveBookmark(library.bookmarks[0].id)
     #expect(resolved.resolvingSymlinksInPath() == renamed.resolvingSymlinksInPath())
 }
+
+@Test func bookmarkAliasesReferToOneCanonicalDirectory() async throws {
+    let fm = FileManager.default
+    let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? fm.removeItem(at: root) }
+    let source = root.appendingPathComponent("source")
+    let alias = root.appendingPathComponent("alias")
+    try fm.createDirectory(at: source, withIntermediateDirectories: true)
+    try fm.createSymbolicLink(at: alias, withDestinationURL: source)
+    let store = ArchiveLibraryService(file: root.appendingPathComponent("library.json"))
+    _ = try await store.addBookmark(source)
+    let library = try await store.addBookmark(alias)
+    #expect(library.bookmarks.count == 1)
+    let resolved = try await store.resolveBookmark(library.bookmarks[0].id)
+    #expect(resolved.resolvingSymlinksInPath() == source.resolvingSymlinksInPath())
+}
+
+@Test func historyCanReuseASourceSelectedThroughDirectoryAlias() async throws {
+    let fm = FileManager.default
+    let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? fm.removeItem(at: root) }
+    let source = root.appendingPathComponent("source")
+    let alias = root.appendingPathComponent("alias")
+    let zip = root.appendingPathComponent("result.zip")
+    try fm.createDirectory(at: source, withIntermediateDirectories: true)
+    try fm.createSymbolicLink(at: alias, withDestinationURL: source)
+    try Data("fixture".utf8).write(to: zip)
+    let store = ArchiveLibraryService(file: root.appendingPathComponent("library.json"))
+    let library = try await store.remember(
+        source: alias, receipt: ArchiveReceipt(destination: zip, fileCount: 1, skippedCount: 0), preset: .standard)
+    // 新记录保存真实目录，移除链接不应让仍存在的源目录变得不可用。
+    try fm.removeItem(at: alias)
+    let resolved = try await store.resolveHistory(library.history[0].id, source: true)
+    #expect(resolved == source.resolvingSymlinksInPath())
+}
+
+@Test func existingAliasBookmarkCanBeResolvedAndDeduplicated() async throws {
+    let fm = FileManager.default
+    let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? fm.removeItem(at: root) }
+    let source = root.appendingPathComponent("source")
+    let alias = root.appendingPathComponent("alias")
+    try fm.createDirectory(at: source, withIntermediateDirectories: true)
+    try fm.createSymbolicLink(at: alias, withDestinationURL: source)
+    // 模拟旧版本直接为符号链接生成的书签，验证无需清空原记录。
+    var library = ArchiveLibrary()
+    let id = UUID()
+    library.bookmarks = [
+        ArchiveBookmark(
+            id: id, name: "alias",
+            data: try alias.bookmarkData(
+                options: [.withoutImplicitSecurityScope], includingResourceValuesForKeys: nil,
+                relativeTo: nil))
+    ]
+    let file = root.appendingPathComponent("library.json")
+    try JSONEncoder().encode(library).write(to: file)
+    let store = ArchiveLibraryService(file: file)
+    #expect(try await store.resolveBookmark(id) == source.resolvingSymlinksInPath())
+    #expect(try await store.addBookmark(source).bookmarks.count == 1)
+}

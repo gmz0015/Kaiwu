@@ -8,7 +8,7 @@
 | 平台工程放在哪里 | [平台约定](../apps/README.md)、[macOS 工程](../apps/macos/README.md) |
 | 当前版本有什么变化 | [变更记录](../changelog/README.md)、[未发布](../changelog/Unreleased.md) |
 | 功能属于哪一层 | [架构](ARCHITECTURE.md)、[工作流边界](WORKSTREAMS.md) |
-| 本次要跑什么验证 | [测试与完成标准](TESTING.md) |
+| 本次要跑什么验证 | [测试与完成标准](TESTING.md)、[本地工具验收操作单](LOCAL-TOOLS-ACCEPTANCE.md) |
 | 当前已做到哪里 | [模块目录](../apps/macos/Sources)、[工具检查器](../apps/macos/Tools/RepositoryChecks/README.md) 中的 README |
 | 下一阶段优先做什么 | [路线图](ROADMAP.md) |
 | 尚未确定的跨模块问题 | [待定事项](OPEN-ITEMS.md) |

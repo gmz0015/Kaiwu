@@ -27,4 +27,4 @@
 
 [网络测试](../../Tests/NetworkFeatureTests/NetworkTests.swift)、[代理与隐私测试](../../Tests/NetworkFeatureTests/ProxyDiagnosticsTests.swift) 使用构造配置验证失败、停用、无效字段、远端跳过、去重、关闭外部探测与脱敏白名单。
 
-[回环集成测试](../../Tests/NetworkFeatureTests/LocalProxyIntegrationTests.swift) 绑定系统分配的回环端口，验证真实 TCP 和 HEAD 请求，不访问公网。`make check` 不改变系统网络；真实系统读取及 UI 验收范围见 [验证记录](../../../../docs/VALIDATION.md)。
+[回环集成测试](../../Tests/NetworkFeatureTests/LocalProxyIntegrationTests.swift) 分别绑定 IPv4/IPv6 回环接口的系统分配端口，验证真实 TCP 和 HEAD 请求，不访问公网。`make check` 不改变系统网络；真实系统读取及 UI 验收范围见 [验证记录](../../../../docs/VALIDATION.md)。
