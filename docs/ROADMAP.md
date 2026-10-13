@@ -1,15 +1,19 @@
 # 开发路线图
 
-路线图记录阶段顺序；当前完成状态以 [各模块 README](../README.md) 为准，不在此重复维护实时进度。基础阶段验证见 [VALIDATION](VALIDATION.md)。
+路线图记录阶段顺序与验收里程碑；具体能力以 [模块状态索引](../apps/macos/README.md) 中的 README 为准，验证证据以 [VALIDATION](VALIDATION.md) 为准。代码合并与阶段验收分别记录。
 
 ## 1 · 打磨本地工具
 
-2026-10-12：本阶段四项已落地代码与自动化验证；桌面交互与真实外部卷验收仍待完成，暂不勾选阶段验收。功能现状见 [ArchiveFeature](../apps/macos/Sources/ArchiveFeature/README.md)、[NetworkFeature](../apps/macos/Sources/NetworkFeature/README.md) 和 [KaiwuApp](../apps/macos/Sources/KaiwuApp/README.md)，证据及限制见 [验证记录](VALIDATION.md)。
+2026-10-13 核对：[PR #3](https://github.com/gmz0015/Kaiwu/pull/3) 已于 2026-10-12 合并，ZIP 进度/预设/书签/历史、诊断分组/脱敏导出、按服务代理/本机端口/PAC 检查、持久化设置/统一任务状态均已进入主分支，PR 与合并后主分支 CI 均通过。功能现状见 [ArchiveFeature](../apps/macos/Sources/ArchiveFeature/README.md)、[NetworkFeature](../apps/macos/Sources/NetworkFeature/README.md) 和 [KaiwuApp](../apps/macos/Sources/KaiwuApp/README.md)。
 
-- [ ] ZIP 进度、规则预设、书签与历史；大目录/磁盘不足/文件变化专项测试
-- [ ] 网络诊断界面分组，受控导出与隐私脱敏
-- [ ] 本机代理端口、PAC 与按服务代理检查
-- [ ] 设置持久化与统一任务生命周期
+阶段收尾仍需完成以下验收，不能以代码合并代替：
+
+- [ ] ZIP 原生交互：目录/保存面板、阶段与取消反馈、书签、历史和再次打包
+- [ ] 文件系统实测：真实满盘、跨卷/ExFAT 与极大目录；已有注入失败和 2,049 文件测试不能替代这些场景
+- [ ] 网络原生交互与实机配置：分组、脱敏预览/保存、VPN、多服务切换、IPv6 与远端 PAC 的跳过行为
+- [ ] 设置与任务联动：多窗口、重启后偏好、跨页取消与重复启动反馈
+
+本阶段的自动化证据、现有环境限制和后续验收入口见 [验证记录](VALIDATION.md)。
 
 ## 2 · 内嵌终端
 

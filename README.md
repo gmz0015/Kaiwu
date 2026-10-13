@@ -2,13 +2,13 @@
 
 面向开发与日常办公的原生 macOS 工具箱。应用代码使用 **Swift 6 + SwiftUI**，最低支持 **macOS 14**，允许通过独立适配器接入 Ghostty / Mihomo 等原生引擎。
 
-当前是可运行、可测试的工程起点，不是全部功能已经完成的发行版本。基础构建不需要下载第三方依赖，不需要开发者账户。
+当前为本地工具开发版本，尚未正式发行。阶段进展见 [路线图](docs/ROADMAP.md)，已验证范围与待验收项见 [验证记录](docs/VALIDATION.md)。基础构建不需要下载第三方依赖，不需要开发者账户。
 
 开发前先读 [AGENTS.md](AGENTS.md) 和 [CONTRIBUTING.md](CONTRIBUTING.md)。完整入口见 [文档地图](docs/README.md)。
 
 ## 开始开发
 
-要求：macOS 14+、Xcode 16+（含 Swift 6），`xcode-select` 指向完整 Xcode。初始化时使用 Xcode 27 / Swift 6.4 验证；最低工具链兼容性由后续 CI 持续验证。
+要求：macOS 14+、Xcode 16+（含 Swift 6），`xcode-select` 指向完整 Xcode。实际通过的本地与 CI 工具链见 [验证记录](docs/VALIDATION.md)；最低系统与最低工具链组合仍需单独验收，不能由单一 CI runner 的通过结果推断。
 
 ```bash
 ./script/build_and_run.sh          # 构建 .app 并启动；Codex Run 使用同一入口
@@ -37,7 +37,7 @@ SwiftPM 是模块与测试入口；Xcode App target 引用同一套本地 Packag
 
 各模块 README 维护“现状 / 已完成 / 下一步 / 验证”，此处只保留索引。
 
-默认注入关闭的 CloudKit 服务；启动不会触发账户访问、云同步或网络探测。网络探测必须主动点击，会访问用户指定的 HTTPS 地址，并向 `223.5.5.5` 发起 DNS 对照查询。
+默认注入关闭的 CloudKit 服务；启动不会触发账户访问、云同步或网络探测。诊断由用户主动运行，外部 DNS/HTTPS 探测可关闭；具体请求范围与导出边界见 [NetworkFeature](apps/macos/Sources/NetworkFeature/README.md)。
 
 ## 目录结构
 
@@ -70,11 +70,7 @@ Makefile                    常用命令导航
 
 ## 打包行为
 
-- 默认递归排除 `.DS_Store`、`._*`、`__MACOSX`、`.Spotlight-V100`、`.Trashes`、`.fseventsd`、`.TemporaryItems`。
-- `.git`、`.build`、`node_modules`、`DerivedData` 由独立选项控制；其他隐藏文件（包括 `.env`）保留。分享前请自行确认目录内容。
-- 跳过符号链接与非常规文件，不跟随链接读取其他目录；保留空目录。
-- 目标 ZIP 必须位于源目录外，并使用未占用的文件名。先在临时目录构建，再写入目标位置；失败或取消会清理临时产物。
-- 使用系统 `/usr/bin/zip`，Swift 负责遍历、策略与任务控制；不依赖 shell 拼接。需要容纳暂存副本与 ZIP 的磁盘空间，打包期间请避免修改源目录。
+打包规则、文件保护、书签和历史的说明统一维护在 [ArchiveFeature](apps/macos/Sources/ArchiveFeature/README.md)。分享前请核对源目录内容；普通隐藏文件（包括 `.env`）会保留。
 
 ## 继续扩展
 
