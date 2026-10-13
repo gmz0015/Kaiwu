@@ -9,7 +9,7 @@
 | 基础设施 | Core、UI、Tools、Configuration、script、Package、Xcode 工程 | 可复用能力与开发入口 | 规则、离线测试、双构建入口一致 |
 | 应用体验 | KaiwuApp | 装配模块，场景和导航 | 注册、窗口与设置可用 |
 | 文件工具 | ArchiveFeature | 用户目录 → 归档结果 | 内容正确、目标保护、取消/错误可见 |
-| 网络工具 | NetworkFeature | 参数 → 证据与修复计划 | 无副作用诊断，失败不误报正常 |
+| 网络工具 | NetworkFeature | 参数 → 证据与修复计划 | 只读系统配置、探测范围受控，失败不误报正常 |
 | 终端 | TerminalFeature、Integrations/Ghostty | 目录与会话 → 终端生命周期 | 目录、焦点、输入和进程路径验证 |
 | 代理 | ProxyFeature、Integrations/Mihomo | 控制器 → 代理领域状态 | 凭证边界、失败语义与真实 API 验证 |
 | 云同步 | CloudServices | 白名单偏好 → 账户/同步状态 | 关闭、离线、冲突、账户切换定义清晰 |

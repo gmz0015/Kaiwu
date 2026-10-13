@@ -23,14 +23,11 @@
 | CloudKit | [云账户与同步契约](Sources/CloudServices/README.md) |
 | 工程检查 | [RepositoryChecks](Tools/RepositoryChecks/README.md) |
 
-模块 README 维护现状、已完成、下一步和验证，避免多处复制进度。新增功能步骤见 [架构](../../docs/ARCHITECTURE.md)。默认 CloudKit 关闭，网络诊断只有用户主动运行后才访问指定 HTTPS 地址并向 223.5.5.5 发起 DNS 对照查询。
+模块 README 维护现状、已完成、下一步和验证，避免多处复制进度。新增功能步骤见 [架构](../../docs/ARCHITECTURE.md)。默认 CloudKit 关闭；网络诊断由用户主动运行，外部探测可关闭，具体请求范围见 [NetworkFeature](Sources/NetworkFeature/README.md)。
 
 ## 打包行为
 
-- 默认递归排除 `.DS_Store`、`._*`、`__MACOSX`、`.Spotlight-V100`、`.Trashes`、`.fseventsd`、`.TemporaryItems`。
-- `.git`、`.build`、`node_modules`、`DerivedData` 由独立选项控制，其他隐藏文件（包括 `.env`）保留，分享前请核对目录内容。
-- 跳过符号链接与非常规文件，保留空目录；目标 ZIP 必须位于源目录外，且不能覆盖已有文件。
-- Swift 控制遍历、过滤与取消，系统 zip 创建归档；先暂存再写入目标位置，失败或取消清理产物。需要额外磁盘空间，打包时请避免修改源目录。
+打包预设、过滤规则、目标保护、进度、书签和历史统一见 [ArchiveFeature](Sources/ArchiveFeature/README.md)。
 
 ## 配置与权限
 
